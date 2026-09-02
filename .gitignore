@@ -1,0 +1,46 @@
+# Android / Gradle
+**/.gradle/
+**/build/
+**/local.properties
+**/.cxx/
+**/.externalNativeBuild/
+*.apk
+*.aab
+*.ap_
+*.zip
+*.7z
+# Signing secrets must NEVER be published
+**/signing/
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+*Signatur-Backup*
+keystore.properties
+signing.properties
+.env
+.env.*
+!.env.example
+# Web dependencies / generated output
+**/node_modules/
+**/node_modules.*/
+**/dist/
+**/.pnpm-store/
+**/coverage/
+*.tsbuildinfo
+# Editors / local tooling
+.idea/
+**/.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+*.log
+# Release binaries are uploaded separately, not committed
+/Release-Dateien/
+/release-assets/
+# Gradle wrapper is intentionally included
+!**/gradle/wrapper/gradle-wrapper.jar
+# The already bundled, offline Android UI is intentionally included.

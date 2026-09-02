@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wachwerk_ink">#06131F</color>
+    <color name="wachwerk_panel">#0D2133</color>
+    <color name="wachwerk_mint">#9BF5B1</color>
+    <color name="wachwerk_ice">#C9DCF8</color>
+    <color name="wachwerk_sun">#FFD347</color>
+</resources>

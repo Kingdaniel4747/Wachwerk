@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wachwerk</string>
+    <string name="accessibility_desc">Sperrt ausschließlich die von dir ausgewählten Apps. Wachwerk liest keine Bildschirminhalte und überträgt keine Daten.</string>
+</resources>

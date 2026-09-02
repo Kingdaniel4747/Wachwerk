@@ -1,0 +1,47 @@
+apply plugin: "com.android.application"
+
+android {
+    namespace "de.danberg.wachwerk"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "de.danberg.wachwerk"
+        minSdk 26
+        targetSdk 35
+        versionCode 14
+        versionName "1.13.0"
+    }
+
+    signingConfigs {
+        release {
+            def keystorePath = System.getenv("WACHWERK_KEYSTORE")
+            if (keystorePath != null) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("WACHWERK_STORE_PASSWORD")
+                keyAlias System.getenv("WACHWERK_KEY_ALIAS") ?: "wachwerk"
+                keyPassword System.getenv("WACHWERK_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "com.google.zxing:core:3.4.1"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:4.11.0"
+    testImplementation "org.json:json:20240303"
+}

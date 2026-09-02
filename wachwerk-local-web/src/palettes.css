@@ -1,0 +1,110 @@
+/* Original stays the default. Standby keeps its independent clock-colour setting. */
+:root {
+  --action: #9bf5b1;
+  --field: #0c2130;
+  --field-line: #345063;
+  --success-soft: rgba(155,245,177,.10);
+  --danger-soft: rgba(244,143,143,.10);
+}
+:root[data-palette="solar"] {
+  --ink: #002638;
+  --ink-2: #002d43;
+  --panel: #003049;
+  --panel-2: #123f51;
+  --line: #315260;
+  --muted: #b9beb0;
+  --ice: #eae2b7;
+  --mint: #a5cda7;
+  --sun: #fcbf49;
+  --danger: #ff9b8b;
+  --action: #f77f00;
+  --field: #00293d;
+  --field-line: #48606a;
+  --success-soft: #294b43;
+  --danger-soft: #4a323a;
+  --hero-muted: #536052;
+  --cycle-surface: #164655;
+}
+:root[data-palette="dusk"] {
+  --ink: #191629;
+  --ink-2: #211c33;
+  --panel: #29223e;
+  --panel-2: #342b49;
+  --line: #514662;
+  --muted: #b8acc8;
+  --ice: #e6def5;
+  --mint: #90cdb7;
+  --sun: #edd9bc;
+  --danger: #eaa6ad;
+  --action: #c2b2f1;
+  --field: #211b33;
+  --field-line: #5a4d6b;
+  --success-soft: #2a433f;
+  --danger-soft: #49313f;
+  --hero-muted: #685777;
+  --cycle-surface: #40335a;
+}
+.palette-options { display: grid; gap: 10px; }
+.palette-options button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--field); text-align: left; }
+.palette-options button.selected { border-color: var(--action); }
+.palette-options strong { flex: 1; font-size: 14px; }
+.palette-swatches { display: flex; gap: 3px; flex-shrink: 0; }
+.palette-swatches i { width: 15px; height: 25px; border-radius: 5px; border: 1px solid rgba(255,255,255,.16); }
+.palette-check { color: var(--action); width: 14px; }
+
+/* Apply the extra palettes to old fixed-colour surfaces, not the functional light alarm. */
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.bottom-nav,.modal-sheet,.rotary-sheet,.toast) { background: var(--ink-2); border-color: var(--line); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.settings-card,.focus-timer-card,.focus-timer-card.active,.blocker-hero,.blocker-hero.active,.app-picker > button,.limit-picker > article,.window-picker > article,.open-habits article,.habit-list article,.consistency-card,.qr-page-card) { background: var(--panel); border-color: var(--line); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.app-screen,.modal-sheet) :is(input:not(.time-native-input),select,textarea,.composer-option,.reminder-picker,.focus-app-picker,.focus-option,.app-search,.focus-app-picker > div > button) { background: var(--field); border-color: var(--field-line); color: var(--ice); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.primary-button,.cycle-apply,.carousel-dots i.active) { background: var(--action); color: var(--ink); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .bottom-nav button.active > span { color: var(--action); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.overline,.field-label,.choice-row button:not(.active),.reminder-picker > span,.focus-number > span,.focus-running span,.cycle-card .science-note,.current-sleep-time span) { color: var(--muted); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .hero-card :is(.overline,p) { color: var(--hero-muted); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .moon-orbit { border-color: var(--hero-muted); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .cycle-card { background: var(--cycle-surface); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.suggestion-list em,.challenge-pill,.app-letter,.focus-protection-summary span,.file-picker-button,.secondary-button,.permission-button,.tone-field) { background: var(--panel-2); color: var(--ice); border-color: var(--line); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.suggestion-list button.selected,.habit-list article.done-today,.open-habits article.done-today,.app-picker > button.selected,.focus-app-picker > div > button.selected,.nfc-enroll.ready) { background: var(--success-soft); border-color: var(--mint); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .suggestion-list button.selected em { background: var(--mint); color: var(--ink); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .toggle { background: var(--field-line); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .toggle.on { background: var(--mint); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .toggle.on span { background: var(--ink); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.consistency-grid,.consistency-legend) .complete { background: var(--mint); color: var(--ink); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) :is(.consistency-grid,.consistency-legend) .missed { background: var(--danger); color: var(--ink); }
+:root[data-palette="solar"] :is(.consistency-grid,.consistency-legend) .missed { background: #d62828; color: #fff; }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .rotary-dial { background: radial-gradient(circle, var(--panel-2) 54%, var(--ink) 55%); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .dial-ticks i { background: linear-gradient(var(--line) 0 10px,transparent 10px); }
+:root:is([data-palette="solar"],[data-palette="dusk"]) .dial-ticks i.major { background: linear-gradient(var(--muted) 0 18px,transparent 18px); }
+.dial-marker { background: var(--action); box-shadow: none; }
+
+/* Compact values, generous labels, no decorative chevrons. */
+select { appearance: none; -webkit-appearance: none; background-image: none !important; }
+summary::-webkit-details-marker { display: none; }
+.number-field { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; min-height: 44px; gap: 14px; margin: 14px 0; }
+.number-field > span { color: var(--ice); font-size: 14px; font-weight: 600; line-height: 1.45; }
+.number-field .number-trigger { width: auto; min-width: 80px; min-height: 44px; gap: 5px; padding: 9px 12px; border-radius: 12px; background: var(--field); border: 1px solid var(--field-line); }
+.number-trigger strong { font-size: 20px; }
+.number-trigger small { font-size: 12px; color: var(--muted); font-weight: 500; }
+.number-grid { grid-template-columns: 1fr; }
+.settings-card .number-grid { gap: 2px; margin: 14px 0; }
+.number-field.focus-number { display: flex; min-height: 76px; gap: 8px; margin: 0; }
+.focus-values .number-field > span { min-height: 2.8em; font-size: 13px; align-items: center; }
+.focus-values .number-trigger { width: 100%; min-width: 0; flex-wrap: nowrap; padding: 9px 5px; }
+.number-field.limit-custom { display: block; width: auto; padding: 0; min-height: 44px; }
+.limit-custom .number-trigger { min-width: 78px; min-height: 44px; }
+.habit-list article,.open-habits article { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; min-height: 76px; }
+.habit-check,.todo-delete { flex: 0 0 32px; }
+.habit-copy { flex: 1 1 0; }
+.habit-check.habit-success { background: var(--success-soft); color: var(--mint); border-color: var(--mint); }
+.habit-check.habit-failure { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+.habit-check.habit-success[aria-pressed=true] { background: var(--mint); color: var(--ink); }
+.habit-check.habit-failure[aria-pressed=true] { background: var(--danger); color: var(--ink); }
+.modal-handle { min-height: 68px; margin: 0 -18px 8px; touch-action: pan-x; cursor: grab; }
+.modal-handle i { pointer-events: none; }
+.modal-sheet { touch-action: pan-y; scrollbar-width: none; color-scheme: dark; }
+.modal-sheet::-webkit-scrollbar { display: none; }
+.modal-sheet.dragging { user-select: none; }
+.rotary-sheet .modal-handle { min-height: 56px; }
+.rotary-sheet { padding-bottom: 20px; }
+.screen-qr .round-action { width: auto; border-radius: 14px; padding: 0 12px; font-size: 13px; }
+@media(max-width:350px) { .palette-swatches i { width: 11px; } .habit-list article,.open-habits article { gap: 7px; } }
+@media(orientation:landscape) and (max-height:600px) { .modal-handle { min-height: 50px; } }
