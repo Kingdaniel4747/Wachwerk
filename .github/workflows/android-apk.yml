@@ -1,0 +1,204 @@
+name: Android APK bauen
+
+run-name: APK · ${{ inputs.build_type || 'debug' }} · ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'wachwerk-android/**'
+      - 'wachwerk-local-web/**'
+      - '.github/workflows/android-apk.yml'
+  pull_request:
+    paths:
+      - 'wachwerk-android/**'
+      - 'wachwerk-local-web/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'debug = Test-APK; release = APK mit deinem privaten Signaturschlüssel'
+        type: choice
+        required: true
+        default: debug
+        options:
+          - debug
+          - release
+
+# Kein Push, kein automatischer Release und keine Schreibrechte auf den Quellcode.
+permissions:
+  contents: read
+
+concurrency:
+  group: apk-${{ github.event_name }}-${{ github.ref }}-${{ inputs.build_type || 'debug' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Oberfläche prüfen und APK bauen
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      BUILD_TYPE: ${{ inputs.build_type || 'debug' }}
+
+    steps:
+      - name: Release nur manuell vom Standardbranch zulassen
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          case "$BUILD_TYPE" in
+            debug) ;;
+            release)
+              if [[ "$EVENT_NAME" != "workflow_dispatch" || "$GITHUB_REF" != "refs/heads/$DEFAULT_BRANCH" ]]; then
+                echo "::error::Release bitte manuell vom Standardbranch starten."
+                exit 1
+              fi
+              ;;
+            *) echo "::error::Unbekannter Build-Typ."; exit 1 ;;
+          esac
+
+      # Actions sind auf überprüfte Commit-IDs statt beweglicher Tags festgelegt.
+      - name: Quellcode auschecken
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Node.js 24 einrichten
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: pnpm aus package.json einrichten
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          package_json_file: wachwerk-local-web/package.json
+          run_install: false
+          cache: true
+          cache_dependency_path: wachwerk-local-web/pnpm-lock.yaml
+
+      - name: Web-Abhängigkeiten installieren
+        working-directory: wachwerk-local-web
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript und Web-Logik prüfen
+        working-directory: wachwerk-local-web
+        run: |
+          pnpm exec tsc --noEmit
+          pnpm test
+
+      - name: Aktuelle Oberfläche offline in die Android-App einbauen
+        working-directory: wachwerk-local-web
+        run: |
+          pnpm run build
+          test -s ../wachwerk-android/app/src/main/assets/site/index.html
+
+      - name: Java 17 einrichten
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK 35 sicherstellen
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            --install 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
+
+      - name: Gradle-Wrapper prüfen und Cache einrichten
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          cache-provider: basic
+          cache-read-only: ${{ github.event_name == 'pull_request' || env.BUILD_TYPE == 'release' }}
+          validate-wrappers: true
+          dependency-graph: disabled
+          build-scan-publish: false
+
+      - name: Android-Logik und Lint prüfen
+        working-directory: wachwerk-android
+        run: bash gradlew --no-daemon --no-configuration-cache testDebugUnitTest lintRelease
+
+      - name: Test-APK bauen
+        if: env.BUILD_TYPE == 'debug'
+        working-directory: wachwerk-android
+        run: bash gradlew --no-daemon --no-configuration-cache assembleDebug
+
+      # Secrets werden nur diesem Schritt bereitgestellt, niemals einem PR-Build.
+      # Kein Keystore im Repository, im Cache oder in den Download-Artefakten.
+      - name: Release-APK mit privatem Schlüssel bauen
+        if: env.BUILD_TYPE == 'release'
+        working-directory: wachwerk-android
+        env:
+          WACHWERK_KEYSTORE_BASE64: ${{ secrets.WACHWERK_KEYSTORE_BASE64 }}
+          WACHWERK_STORE_PASSWORD: ${{ secrets.WACHWERK_STORE_PASSWORD }}
+          WACHWERK_KEY_ALIAS: ${{ secrets.WACHWERK_KEY_ALIAS }}
+          WACHWERK_KEY_PASSWORD: ${{ secrets.WACHWERK_KEY_PASSWORD }}
+        run: |
+          for secret_name in WACHWERK_KEYSTORE_BASE64 WACHWERK_STORE_PASSWORD WACHWERK_KEY_ALIAS WACHWERK_KEY_PASSWORD; do
+            if [[ -z "${!secret_name}" ]]; then
+              echo "::error::GitHub-Secret $secret_name fehlt. Siehe docs/GITHUB-ACTIONS.md."
+              exit 1
+            fi
+          done
+          umask 077
+          WACHWERK_KEYSTORE="$(mktemp "$RUNNER_TEMP/wachwerk-signing-XXXXXX.jks")"
+          export WACHWERK_KEYSTORE
+          trap 'rm -f -- "$WACHWERK_KEYSTORE"' EXIT
+          printf '%s' "$WACHWERK_KEYSTORE_BASE64" | base64 --decode > "$WACHWERK_KEYSTORE"
+          unset WACHWERK_KEYSTORE_BASE64
+          test -s "$WACHWERK_KEYSTORE"
+          bash gradlew --no-daemon --no-configuration-cache assembleRelease
+
+      - name: APK-Signatur prüfen und Download vorbereiten
+        run: |
+          apk="wachwerk-android/app/build/outputs/apk/$BUILD_TYPE/app-$BUILD_TYPE.apk"
+          test -s "$apk"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk"
+          mkdir -p apk-download
+          cp "$apk" "apk-download/Wachwerk-$BUILD_TYPE.apk"
+          (
+            cd apk-download
+            sha256sum "Wachwerk-$BUILD_TYPE.apk" > SHA256SUMS.txt
+            printf 'Build: %s\nCommit: %s\nWorkflow-Lauf: %s, Versuch: %s\n' \
+              "$BUILD_TYPE" "$GITHUB_SHA" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_ATTEMPT" > BUILD-INFO.txt
+          )
+
+      - name: APK zum Herunterladen bereitstellen
+        id: apk
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Wachwerk-${{ env.BUILD_TYPE }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: apk-download/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: Download im Ergebnis anzeigen
+        env:
+          APK_URL: ${{ steps.apk.outputs.artifact-url }}
+        run: |
+          {
+            printf '## Wachwerk-APK ist fertig\n\n[APK-Paket herunterladen](%s)\n\n' "$APK_URL"
+            printf 'Enthalten: APK, SHA-256-Prüfsumme und Commit-ID. Das ZIP vor der Installation entpacken.\n\n'
+            if [[ "$BUILD_TYPE" == "debug" ]]; then
+              printf '**Test-APK:** Nicht mit dem bisherigen Release-Schlüssel signiert; kein Update deiner vorhandenen Release-Installation. Vorhandene App nicht für einen Test deinstallieren.\n'
+            else
+              printf '**Release-APK:** Mit dem hinterlegten Schlüssel signiert. Für Updates müssen Signaturschlüssel und Paketname passen; den Versionscode bei neuen Versionen erhöhen.\n'
+            fi
+            printf '\nEs wurde kein GitHub-Release veröffentlicht und kein Quellcode zurückgeschrieben.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Test- und Lint-Berichte aufbewahren
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Pruefberichte-${{ env.BUILD_TYPE }}-${{ github.run_number }}-${{ github.run_attempt }}
+          path: |
+            wachwerk-android/app/build/reports/tests/
+            wachwerk-android/app/build/test-results/
+            wachwerk-android/app/build/reports/lint-results*
+          if-no-files-found: ignore
+          retention-days: 14

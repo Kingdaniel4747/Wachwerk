@@ -10,7 +10,7 @@ Wachwerk verbindet Wecker, Einschlaf-Erinnerungen, einen Standby-Modus, Fokus-Ti
 
 **Android 8.0+ · Offline · Kein Benutzerkonto · Version 1.13.0 · In Entwicklung**
 
-[Installation](docs/INSTALLATION.md) · [Selbst bauen](docs/ENTWICKLUNG.md) · [Änderungen](CHANGELOG.md) · [Datenschutz](docs/DATENSCHUTZ.md)
+[Installation](docs/INSTALLATION.md) · [APK auf GitHub bauen](docs/GITHUB-ACTIONS.md) · [Selbst bauen](docs/ENTWICKLUNG.md) · [Änderungen](CHANGELOG.md) · [Datenschutz](docs/DATENSCHUTZ.md)
 
 ## Die Idee
 
@@ -59,6 +59,8 @@ Die APK lädt ihre Oberfläche direkt aus den mitgelieferten Dateien. Die eigent
 Androids systemeigene Sicherung kann unabhängig davon aktiv sein. Details zu Speicherung, Berechtigungen und Grenzen stehen unter [Datenschutz](docs/DATENSCHUTZ.md).
 
 ## Quellcode & Entwicklung
+
+**Ohne Android Studio:** Der Workflow **Android APK bauen** erstellt nach Code-Änderungen auf `main`/`master` und für Pull Requests eine Test-APK. Unter **Actions → Android APK bauen → Run workflow** lässt sich der Build auch manuell starten. Eine signierte Release-APK ist nach Einrichtung deiner privaten GitHub-Secrets möglich. Anleitung und Unterschiede zwischen Test-APK und kompatiblem Update: [APK auf GitHub bauen lassen](docs/GITHUB-ACTIONS.md).
 
 ```text
 wachwerk-android/      Android-App, native Dienste und Tests

@@ -2,6 +2,8 @@
 
 Diese Anleitung beschreibt den manuellen Upload. Das vorbereitete Paket nimmt keine Veröffentlichung und keine Kontoänderung vor.
 
+Neue APKs kann inzwischen der Workflow **Android APK bauen** erzeugen. Er veröffentlicht sie als temporäre Actions-Downloads, nicht automatisch als Release. Für eine mit deinem bisherigen Schlüssel signierte APK zuerst die [GitHub-Actions-Anleitung](GITHUB-ACTIONS.md) befolgen und anschließend die heruntergeladene Release-APK als Release-Asset anhängen.
+
 ## Repository anlegen
 
 1. Auf GitHub **New repository** wählen.

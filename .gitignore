@@ -41,6 +41,7 @@ Thumbs.db
 # Release binaries are uploaded separately, not committed
 /Release-Dateien/
 /release-assets/
+/apk-download/
 # Gradle wrapper is intentionally included
 !**/gradle/wrapper/gradle-wrapper.jar
 # The already bundled, offline Android UI is intentionally included.

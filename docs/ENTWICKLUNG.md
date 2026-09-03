@@ -1,5 +1,7 @@
 # Wachwerk selbst bauen
 
+Du möchtest nur den Code bearbeiten und den APK-Build GitHub überlassen? Nutze den vorbereiteten Workflow: [APK mit GitHub Actions bauen](GITHUB-ACTIONS.md). Die folgenden Schritte sind für lokale Builds gedacht.
+
 ## Architektur
 
 Die Oberfläche ist eine lokale React-/TypeScript-Anwendung in einer Android-WebView. Sie liegt vollständig gebündelt in `wachwerk-android/app/src/main/assets/site/index.html`. Über die lokale JavaScript-Brücke `WachwerkAndroid` spricht sie mit den nativen Java-Komponenten.
@@ -20,7 +22,7 @@ Wichtige Bausteine:
 - JDK 17
 - Android SDK Platform 35 und Build Tools 35.0.0
 - Gradle 8.13 über den enthaltenen Wrapper
-- Für Änderungen an der Oberfläche: Node.js 24 und pnpm; der Lockfile ist enthalten
+- Für Änderungen an der Oberfläche: Node.js 24 und pnpm 11.19.0 (in `package.json` festgelegt); der Lockfile ist enthalten
 
 Werkzeuge und Abhängigkeiten benötigen beim ersten Download Internet. Die fertige App benötigt keinen eigenen Server.
 
